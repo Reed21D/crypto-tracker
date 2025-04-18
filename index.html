@@ -81,7 +81,23 @@
             object-fit: contain;
             margin-bottom: 15px;
         }
-        
+
+        .change-indicator {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+
+        .increase {
+            background-color: #28a745; /* اللون الأخضر للزيادة */
+            color: white;
+        }
+
+        .decrease {
+            background-color: #dc3545; /* اللون الأحمر للنقصان */
+            color: white;
+        }
+
         /* إضافة تأثيرات حركة عند التمرير */
         .card-body h5 {
             opacity: 0;
@@ -112,15 +128,20 @@
             container.innerHTML = "";  // Clear existing content
 
             data.forEach(coin => {
+                // تحديد ما إذا كانت العملة في زيادة أم نقصان
+                const changeClass = coin.price_change_percentage_24h >= 0 ? 'increase' : 'decrease';
+                const changeText = coin.price_change_percentage_24h >= 0 ? `+${coin.price_change_percentage_24h}%` : `${coin.price_change_percentage_24h}%`;
+
                 const coinElement = document.createElement('div');
                 coinElement.classList.add('crypto-item');
-                coinElement.innerHTML = ` 
+                coinElement.innerHTML = `
                     <div class="card" style="width: 18rem;">
                         <img src="${coin.image}" class="card-img-top" alt="${coin.name}">
                         <div class="card-body">
                             <h5 class="card-title">${coin.name} (${coin.symbol.toUpperCase()})</h5>
                             <p class="card-text">السعر: $${coin.current_price}</p>
                             <p class="card-text">التغيير في آخر 24 ساعة: ${coin.price_change_percentage_24h}%</p>
+                            <span class="change-indicator ${changeClass}">${changeText}</span>
                         </div>
                     </div>
                 `;
