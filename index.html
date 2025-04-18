@@ -19,21 +19,19 @@
             padding: 0;
             transition: background-color 0.5s, color 0.5s;
         }
-
-        /* الوضع النهاري */
+        
         body.light-mode {
-            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            background: linear-gradient(to right, #ff7e5f, #feb47b); /* خلفية متدرجة للنهاري */
             color: white;
         }
 
-        /* الوضع الليلي */
         body.dark-mode {
-            background-color: #121212;
+            background-color: #121212; /* خلفية داكنة */
             color: #e4e4e4;
         }
 
         h1 {
-            font-size: 40px;
+            font-size: 32px;
             color: #fff;
             margin-bottom: 40px;
             text-align: center;
@@ -53,7 +51,7 @@
         }
 
         .card.dark-mode {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.7); /* خلفية داكنة للبطاقات */
         }
 
         .card:hover {
@@ -67,14 +65,14 @@
         }
 
         .card-title {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: bold;
             color: #343a40;
             margin-bottom: 15px;
         }
 
         .card-text {
-            font-size: 18px;
+            font-size: 16px;
             color: #343a40;
             margin-bottom: 10px;
         }
@@ -86,18 +84,17 @@
         .crypto-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 30px;
+            gap: 15px;
             justify-content: center;
             padding: 20px;
         }
 
         .card-img-top {
-            height: 100px;
+            height: 80px;
             object-fit: contain;
             margin-bottom: 15px;
         }
 
-        /* مؤشر التغيير في السعر */
         .change-indicator {
             font-weight: bold;
             padding: 5px 10px;
@@ -114,37 +111,82 @@
             color: white;
         }
 
-        /* زر التبديل بين الوضعين */
         .toggle-btn {
             display: flex;
             justify-content: flex-end;
             margin: 10px;
         }
 
-        #toggle-mode {
-            background-color: #6c757d; /* لون الخلفية */
-            color: white; /* لون النص */
+        /* بوت المساعد */
+        .chat-box {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 100%;
+            max-width: 350px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+
+        .chat-box-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .chat-box-body {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .chat-box-footer {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .chat-input {
+            width: 80%;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .send-btn {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 50px; /* حواف مستديرة */
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s, transform 0.2s;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
-        #toggle-mode:hover {
-            background-color: #5a6268; /* لون الخلفية عند التمرير */
-            transform: scale(1.1); /* تكبير الزر قليلاً عند التمرير */
+        .send-btn:hover {
+            background-color: #0056b3;
         }
 
-        #toggle-mode:active {
-            transform: scale(0.95); /* تصغير الزر عند الضغط */
+        /* تخصيص الردود في الدردشة */
+        .user-message {
+            background-color: #f1f1f1;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            text-align: right;
         }
 
-        .favorite-crypto {
-            color: gold;
-            font-weight: bold;
+        .bot-message {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            text-align: left;
         }
+
     </style>
 </head>
 <body class="light-mode">
@@ -158,6 +200,18 @@
         </div>
 
         <div id="crypto-container" class="crypto-container"></div>
+    </div>
+
+    <!-- بوت المساعد -->
+    <div class="chat-box" id="chat-box">
+        <div class="chat-box-header">
+            بوت المساعد
+        </div>
+        <div class="chat-box-body" id="chat-box-body"></div>
+        <div class="chat-box-footer">
+            <input type="text" id="chat-input" class="chat-input" placeholder="اسألني أي شيء..." />
+            <button class="send-btn" id="send-btn">إرسال</button>
+        </div>
     </div>
 
     <!-- سكربت JavaScript -->
@@ -211,6 +265,36 @@
 
         setInterval(getCryptoData, 60000);  // تحديث البيانات كل 60 ثانية
         getCryptoData();  // تحميل البيانات عند تحميل الصفحة
+
+        // تفاعل مع بوت المساعد
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatBoxBody = document.getElementById('chat-box-body');
+
+        sendBtn.addEventListener('click', () => {
+            const message = chatInput.value;
+            if (message.trim() === '') return;
+
+            // عرض الرسالة المرسلة من المستخدم
+            chatBoxBody.innerHTML += `<div class="user-message"><strong>أنت:</strong> ${message}</div>`;
+            chatInput.value = '';  // مسح حقل الإدخال
+
+            // الرد على السؤال
+            setTimeout(() => {
+                let response = "آسف، لا أستطيع الإجابة على هذا السؤال.";
+                if (message.includes("العملات")) {
+                    response = "تستطيع تتبع العملات المشفرة من خلال الموقع.";
+                } else if (message.includes("السعر")) {
+                    response = "أسعار العملات تتغير بشكل دوري، يمكنك تحديث الصفحة لمعرفة الأسعار الجديدة.";
+                } else if (message.includes("الوضع الليلي")) {
+                    response = "يمكنك التبديل بين الوضعين النهاري والليلي عبر الزر في أعلى الصفحة.";
+                }
+
+                // عرض الرد
+                chatBoxBody.innerHTML += `<div class="bot-message"><strong>البوت:</strong> ${response}</div>`;
+                chatBoxBody.scrollTop = chatBoxBody.scrollHeight;  // تمرير النص لأسفل
+            }, 1000);
+        });
     </script>
 
     <!-- رابط Bootstrap JavaScript -->
