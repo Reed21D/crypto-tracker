@@ -11,48 +11,91 @@
     <!-- أنماط CSS الخاصة -->
     <style>
         body {
-            background-color: #f8f9fa;
+            background: linear-gradient(to right, #ff7e5f, #feb47b); /* خلفية متدرجة */
             font-family: 'Arial', sans-serif;
+            color: white;
+            margin: 0;
+            padding: 0;
         }
+        
         h1 {
-            font-size: 36px;
-            color: #343a40;
-            margin-bottom: 30px;
-        }
-        .card {
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .card-body {
+            font-size: 40px;
+            color: #fff;
+            margin-bottom: 40px;
             text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
         }
-        .card-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .card-text {
-            font-size: 16px;
-            color: #495057;
-        }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-        .crypto-item {
-            margin-bottom: 20px;
+        
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: rgba(255, 255, 255, 0.9); /* خلفية شفافة للبطاقات */
         }
+        
+        .card:hover {
+            transform: translateY(-10px); /* تأثير رفع البطاقة عند التمرير */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* تأثير الظل عند التمرير */
+        }
+        
+        .card-body {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .card-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #343a40;
+            margin-bottom: 15px;
+        }
+        
+        .card-text {
+            font-size: 18px;
+            color: #343a40;
+            margin-bottom: 10px;
+        }
+
+        .crypto-item {
+            margin-bottom: 30px;
+        }
+        
         .crypto-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 30px;
             justify-content: center;
+            padding: 20px;
         }
+        
+        .card-img-top {
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+        
+        /* إضافة تأثيرات حركة عند التمرير */
+        .card-body h5 {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
     </style>
 </head>
 <body>
 
     <div class="container mt-5">
-        <h1 class="text-center">تتبع العملات المشفرة</h1>
+        <h1>تتبع العملات المشفرة</h1>
         <div id="crypto-container" class="crypto-container"></div>
     </div>
 
@@ -70,7 +113,7 @@
                 coinElement.classList.add('crypto-item');
                 coinElement.innerHTML = `
                     <div class="card" style="width: 18rem;">
-                        <img src="https://cryptoicons.org/api/icon/${coin.symbol.toLowerCase()}" class="card-img-top" alt="${coin.name}">
+                        <img src="${coin.image}" class="card-img-top" alt="${coin.name}">
                         <div class="card-body">
                             <h5 class="card-title">${coin.name} (${coin.symbol.toUpperCase()})</h5>
                             <p class="card-text">السعر: $${coin.current_price}</p>
