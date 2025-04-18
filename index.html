@@ -14,13 +14,24 @@
     <!-- أنماط CSS الخاصة -->
     <style>
         body {
-            background: linear-gradient(to right, #ff7e5f, #feb47b); /* خلفية متدرجة */
             font-family: 'Arial', sans-serif;
-            color: white;
             margin: 0;
             padding: 0;
+            transition: background-color 0.5s, color 0.5s;
         }
-        
+
+        /* الوضع النهاري */
+        body.light-mode {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+        }
+
+        /* الوضع الليلي */
+        body.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
         h1 {
             font-size: 40px;
             color: #fff;
@@ -28,36 +39,40 @@
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         .card {
             border-radius: 15px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            background: rgba(255, 255, 255, 0.9); /* خلفية شفافة للبطاقات */
+            background: rgba(255, 255, 255, 0.9);
         }
-        
+
+        .card.dark-mode {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
         .card:hover {
-            transform: translateY(-10px); /* تأثير رفع البطاقة عند التمرير */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* تأثير الظل عند التمرير */
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
-        
+
         .card-body {
             text-align: center;
             padding: 20px;
         }
-        
+
         .card-title {
             font-size: 22px;
             font-weight: bold;
             color: #343a40;
             margin-bottom: 15px;
         }
-        
+
         .card-text {
             font-size: 18px;
             color: #343a40;
@@ -67,7 +82,7 @@
         .crypto-item {
             margin-bottom: 30px;
         }
-        
+
         .crypto-container {
             display: flex;
             flex-wrap: wrap;
@@ -75,13 +90,14 @@
             justify-content: center;
             padding: 20px;
         }
-        
+
         .card-img-top {
             height: 100px;
             object-fit: contain;
             margin-bottom: 15px;
         }
 
+        /* مؤشر التغيير في السعر */
         .change-indicator {
             font-weight: bold;
             padding: 5px 10px;
@@ -89,37 +105,80 @@
         }
 
         .increase {
-            background-color: #28a745; /* اللون الأخضر للزيادة */
+            background-color: #28a745;
             color: white;
         }
 
         .decrease {
-            background-color: #dc3545; /* اللون الأحمر للنقصان */
+            background-color: #dc3545;
             color: white;
         }
 
-        /* إضافة تأثيرات حركة عند التمرير */
-        .card-body h5 {
-            opacity: 0;
-            animation: fadeIn 1s forwards;
+        /* زر التبديل بين الوضعين */
+        .toggle-btn {
+            display: flex;
+            justify-content: flex-end;
+            margin: 10px;
         }
-        
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
+
+        #toggle-mode {
+            background-color: #6c757d; /* لون الخلفية */
+            color: white; /* لون النص */
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px; /* حواف مستديرة */
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
         }
-        
+
+        #toggle-mode:hover {
+            background-color: #5a6268; /* لون الخلفية عند التمرير */
+            transform: scale(1.1); /* تكبير الزر قليلاً عند التمرير */
+        }
+
+        #toggle-mode:active {
+            transform: scale(0.95); /* تصغير الزر عند الضغط */
+        }
+
+        .favorite-crypto {
+            color: gold;
+            font-weight: bold;
+        }
     </style>
 </head>
-<body>
+<body class="light-mode">
 
     <div class="container mt-5">
         <h1>تتبع العملات المشفرة</h1>
+        
+        <!-- زر التبديل بين الوضع الليلي والنهاري -->
+        <div class="toggle-btn">
+            <button id="toggle-mode" class="btn btn-secondary">تبديل إلى الوضع الليلي</button>
+        </div>
+
         <div id="crypto-container" class="crypto-container"></div>
     </div>
 
     <!-- سكربت JavaScript -->
     <script>
+        // التبديل بين الوضع الليلي والنهاري
+        const toggleModeButton = document.getElementById('toggle-mode');
+        const bodyElement = document.body;
+
+        toggleModeButton.addEventListener('click', () => {
+            if (bodyElement.classList.contains('light-mode')) {
+                bodyElement.classList.remove('light-mode');
+                bodyElement.classList.add('dark-mode');
+                toggleModeButton.textContent = 'تبديل إلى الوضع النهاري';
+            } else {
+                bodyElement.classList.remove('dark-mode');
+                bodyElement.classList.add('light-mode');
+                toggleModeButton.textContent = 'تبديل إلى الوضع الليلي';
+            }
+        });
+
+        // جلب البيانات الخاصة بالعملات المشفرة
         async function getCryptoData() {
             const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd');
             const data = await response.json();
@@ -131,11 +190,12 @@
                 // تحديد ما إذا كانت العملة في زيادة أم نقصان
                 const changeClass = coin.price_change_percentage_24h >= 0 ? 'increase' : 'decrease';
                 const changeText = coin.price_change_percentage_24h >= 0 ? `+${coin.price_change_percentage_24h}%` : `${coin.price_change_percentage_24h}%`;
+                const isFavorite = coin.name.toLowerCase() === 'bitcoin' || coin.name.toLowerCase() === 'ethereum'; // العملات المفضلة
 
                 const coinElement = document.createElement('div');
                 coinElement.classList.add('crypto-item');
                 coinElement.innerHTML = `
-                    <div class="card" style="width: 18rem;">
+                    <div class="card ${isFavorite ? 'favorite-crypto' : ''}" style="width: 18rem;">
                         <img src="${coin.image}" class="card-img-top" alt="${coin.name}">
                         <div class="card-body">
                             <h5 class="card-title">${coin.name} (${coin.symbol.toUpperCase()})</h5>
@@ -149,8 +209,8 @@
             });
         }
 
-        setInterval(getCryptoData, 60000);  // Update every 60 seconds
-        getCryptoData();  // Initial call when page loads
+        setInterval(getCryptoData, 60000);  // تحديث البيانات كل 60 ثانية
+        getCryptoData();  // تحميل البيانات عند تحميل الصفحة
     </script>
 
     <!-- رابط Bootstrap JavaScript -->
